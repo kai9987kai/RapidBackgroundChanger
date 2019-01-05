@@ -1,8 +1,11 @@
 import win32api, win32con, win32gui
-import keyboard
+import keyboard 
+import platform
 from tkinter import *
 from tkinter import Menu
 from tkinter import messagebox
+
+os = platform.release()
 
 def setWallpaper(path):
     key = win32api.RegOpenKeyEx(win32con.HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, win32con.KEY_SET_VALUE)
@@ -17,31 +20,23 @@ def Email():
 def start():
     running = True
     while running:
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img100.jpg'
-            setWallpaper(path)
 
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img101.jpg'
-            setWallpaper(path)
+        i = 0
 
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img105.jpg'
-            setWallpaper(path)
-
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img102.jpg'
-            setWallpaper(path)
-
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img103.jpg'
-            setWallpaper(path)
-
-        if __name__ == "__main__":
-            path = r'C:\Windows\Web\Screen\img104.jpg'
-            setWallpaper(path)
+        if os == "10":
+            while(i<=5):
+                path = r'C:\Windows\Web\Screen\img10'+str(i)+'.jpg'
+                setWallpaper(path)
+                i+=1
+        elif os == "7":
+            while(i<=5):
+                #change the path for windows 7
+                path = r'C:\Windows\Web\Screen\img10'+str(i)+'.jpg'
+                setWallpaper(path)
+                i+=1
 
         if keyboard.is_pressed('c'):
+            running=False
             break
 window = Tk()
 window.title("Rapid background changer")
@@ -64,5 +59,8 @@ menu.add_cascade(label='Menu', menu=new_item)
 window.config(menu=menu)
 menu.add_cascade(label='Help', menu=new_item2)
 window.resizable(False, False)
-window.iconbitmap('favicon.ico')  # Set icon
+try:
+	window.iconbitmap('favicon.ico')  # Set icon
+except:
+	print("rip favicon")
 window.mainloop()
