@@ -5,8 +5,13 @@ from tkinter import *
 from tkinter import Menu
 from tkinter import messagebox
 import threading
+import webbrowser
 
 os = platform.release()
+
+
+def callback():
+    webbrowser.open_new(r"https://github.com/kai9987kai/RapidBackgroundChanger")
 
 def update():
     window.update()
@@ -63,6 +68,7 @@ menu = Menu(window)
 new_item = Menu(window)
 new_item2 = Menu(window)
 new_item2.add_command(label='Contact', command=Email)
+new_item2.add_command(label='GitHub Page', command=callback)
 new_item.add_command(label='Start', command=start)
 new_item.add_command(label='Exit', command=EXITME)
 menu.add_cascade(label='Menu', menu=new_item)
