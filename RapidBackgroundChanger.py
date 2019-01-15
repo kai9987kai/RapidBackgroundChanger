@@ -49,9 +49,8 @@ def start():
             break
 
 def EXITME():
-    exit(0)
-    running = False# crashed prog so it closes
-    # strtoint("crashmE!")
+    window.destroy()
+    running = False
 
 window = Tk()
 window.title("Rapid background changer")
