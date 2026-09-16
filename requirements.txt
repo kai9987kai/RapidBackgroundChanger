@@ -1,0 +1,7 @@
+# The core application has no required third-party dependencies:
+# the Windows backend uses ctypes, and the GUI uses tkinter from the standard
+# library (Debian/Ubuntu package it separately as `python3-tk`).
+
+# Optional: enables the system-wide Ctrl+C emergency stop while the window is
+# not focused. On Linux this needs root, so it is safe to leave uninstalled.
+keyboard>=0.13; platform_system == "Windows"
