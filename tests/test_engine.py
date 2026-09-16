@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import threading
 import time
+from pathlib import Path
 
 import pytest
 
@@ -18,6 +19,9 @@ from rapidbackgroundchanger.engine import CycleEngine, EngineState
 from rapidbackgroundchanger.sources import Playlist
 
 PATHS = ["/one.jpg", "/two.jpg", "/three.jpg"]
+#: The engine reports paths as Playlist stores them, so expectations must be
+#: normalised the same way -- on Windows "/one.jpg" becomes "\one.jpg".
+EXPECTED = [str(Path(p)) for p in PATHS]
 
 
 class FlakyBackend(NullBackend):
@@ -103,7 +107,7 @@ def test_no_restore_leaves_the_last_image_in_place():
         backend, Playlist(PATHS), interval=0, max_frames=4, restore_on_stop=False
     )
     engine.run_blocking()
-    assert backend.get() == PATHS[3 % len(PATHS)]
+    assert backend.get() == EXPECTED[3 % len(EXPECTED)]
 
 
 def test_restore_persists_to_disk_even_though_frames_do_not():
@@ -203,7 +207,7 @@ def test_on_frame_and_on_finish_callbacks_fire():
     )
     engine.run_blocking()
     assert [index for index, _ in seen] == [1, 2, 3]
-    assert [path for _, path in seen] == PATHS
+    assert [path for _, path in seen] == EXPECTED
     assert finished and finished[0].frames == 3
 
 
@@ -234,7 +238,7 @@ def test_stats_report_a_sane_rate():
     stats = engine.run_blocking()
     assert stats.fps > 0
     assert stats.elapsed > 0
-    assert stats.current in PATHS
+    assert stats.current in EXPECTED
 
 
 def test_invalid_configuration_is_rejected():

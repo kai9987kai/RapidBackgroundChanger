@@ -46,9 +46,18 @@ def test_select_backend_auto_detects_and_always_returns_something():
 
 
 def test_select_backend_prefers_the_first_available_entry(monkeypatch):
+    """The earliest available entry in BACKENDS wins, whatever the host is.
+
+    Without pinning every entry this passes on Linux and fails on a real Mac
+    or PC, where MacOSBackend and WindowsBackend genuinely come first.
+    """
+    for backend in backends.BACKENDS:
+        monkeypatch.setattr(backend, "available", classmethod(lambda cls: False))
     monkeypatch.setattr(GnomeBackend, "available", classmethod(lambda cls: True))
+    monkeypatch.setattr(NullBackend, "available", classmethod(lambda cls: True))
+
     selected = select_backend()
-    assert isinstance(selected, GnomeBackend)
+    assert isinstance(selected, GnomeBackend)  # Gnome precedes Null in BACKENDS
     assert selected.name == "gnome"
 
 
