@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rapidbackgroundchanger"
+version = "2.0.0"
+description = "Rapidly cycle your desktop wallpaper on Windows, macOS and Linux."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "kai9987kai" }]
+keywords = ["wallpaper", "desktop", "background", "tkinter"]
+classifiers = [
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Desktop Environment",
+]
+dependencies = []
+
+[project.optional-dependencies]
+hotkey = ["keyboard>=0.13"]
+dev = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/kai9987kai/RapidBackgroundChanger"
+
+[project.scripts]
+rapidbackgroundchanger = "rapidbackgroundchanger.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rapidbackgroundchanger*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

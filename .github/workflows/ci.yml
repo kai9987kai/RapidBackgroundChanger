@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.11", "3.12"]
+        exclude:
+          # 3.8 is not built for Apple silicon runners.
+          - os: macos-latest
+            python-version: "3.8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Test
+        run: python -m pytest -q
+      - name: Smoke test the CLI
+        run: |
+          python -m rapidbackgroundchanger --version
+          python -m rapidbackgroundchanger doctor
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pyflakes
+      - run: python -m pyflakes rapidbackgroundchanger tests RapidBackgroundChanger.py

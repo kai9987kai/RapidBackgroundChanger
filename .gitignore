@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Project
+.pytest_cache/
+*.egg-info/
