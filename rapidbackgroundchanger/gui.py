@@ -59,6 +59,7 @@ class RapidBackgroundChangerApp:
         self.folder_var = tk.StringVar(value=self._initial_folder())
         self.rate_var = tk.DoubleVar(value=DEFAULT_RATE)
         self.shuffle_var = tk.BooleanVar(value=False)
+        self.maxspeed_var = tk.BooleanVar(value=False)
         self.restore_var = tk.BooleanVar(value=True)
         self.status_var = tk.StringVar(value=f"Ready - backend: {self.backend.name}")
         self.speed_var = tk.StringVar(value=self._speed_label(DEFAULT_RATE))
@@ -77,8 +78,9 @@ class RapidBackgroundChangerApp:
         dirs: List = default_wallpaper_dirs()
         return str(dirs[0]) if dirs else ""
 
-    @staticmethod
-    def _speed_label(rate: float) -> str:
+    def _speed_label(self, rate: float) -> str:
+        if self.maxspeed_var.get():
+            return "as fast as possible"
         return f"{rate:.0f} changes/sec"
 
     def _build_menu(self) -> None:
@@ -119,12 +121,19 @@ class RapidBackgroundChangerApp:
             command=self.on_speed_changed,
         )
         self.speed_scale.grid(row=1, column=1, sticky="ew", padx=6, pady=(8, 0))
-        ttk.Label(frame, textvariable=self.speed_var, width=14).grid(
+        ttk.Label(frame, textvariable=self.speed_var, width=18).grid(
             row=1, column=2, sticky="w", pady=(8, 0)
         )
+        self.maxspeed_check = ttk.Checkbutton(
+            frame,
+            text="Max speed (no delay between changes)",
+            variable=self.maxspeed_var,
+            command=self.on_maxspeed_changed,
+        )
+        self.maxspeed_check.grid(row=2, column=1, columnspan=2, sticky="w", pady=(4, 0))
 
         options = ttk.Frame(frame)
-        options.grid(row=2, column=0, columnspan=3, sticky="w", pady=(8, 0))
+        options.grid(row=3, column=0, columnspan=3, sticky="w", pady=(8, 0))
         ttk.Checkbutton(
             options, text="Shuffle", variable=self.shuffle_var, command=self.on_shuffle_changed
         ).grid(row=0, column=0, padx=(0, 12))
@@ -133,7 +142,7 @@ class RapidBackgroundChangerApp:
         ).grid(row=0, column=1)
 
         buttons = ttk.Frame(frame)
-        buttons.grid(row=3, column=0, columnspan=3, sticky="ew", pady=(10, 0))
+        buttons.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(10, 0))
         self.start_button = ttk.Button(buttons, text="Start", command=self.on_start)
         self.start_button.grid(row=0, column=0, padx=(0, 6))
         self.pause_button = ttk.Button(buttons, text="Pause", command=self.on_pause, state="disabled")
@@ -142,7 +151,7 @@ class RapidBackgroundChangerApp:
         self.stop_button.grid(row=0, column=2)
 
         ttk.Label(frame, textvariable=self.status_var, anchor="w").grid(
-            row=4, column=0, columnspan=3, sticky="ew", pady=(10, 0)
+            row=5, column=0, columnspan=3, sticky="ew", pady=(10, 0)
         )
         ttk.Label(
             frame,
@@ -150,7 +159,7 @@ class RapidBackgroundChangerApp:
             anchor="w",
             justify="left",
             wraplength=430,
-        ).grid(row=5, column=0, columnspan=3, sticky="ew", pady=(6, 0))
+        ).grid(row=6, column=0, columnspan=3, sticky="ew", pady=(6, 0))
 
     def _bind_keys(self) -> None:
         self.root.bind("<Escape>", lambda _event: self.on_stop())
@@ -192,14 +201,22 @@ class RapidBackgroundChangerApp:
     # ------------------------------------------------------------------
     @property
     def interval(self) -> float:
-        rate = max(MIN_RATE, float(self.rate_var.get()))
-        return 1.0 / rate
+        """Seconds between changes; ``0`` when Max speed is on."""
+        if self.maxspeed_var.get():
+            return 0.0
+        return 1.0 / max(MIN_RATE, float(self.rate_var.get()))
 
     def on_speed_changed(self, _value=None) -> None:
-        rate = float(self.rate_var.get())
-        self.speed_var.set(self._speed_label(rate))
+        self.speed_var.set(self._speed_label(float(self.rate_var.get())))
         if self.engine is not None:
-            self.engine.interval = 1.0 / max(MIN_RATE, rate)
+            self.engine.interval = self.interval
+
+    def on_maxspeed_changed(self) -> None:
+        """Toggle the uncapped mode, which the original script always used."""
+        self.speed_scale.configure(
+            state="disabled" if self.maxspeed_var.get() else "normal"
+        )
+        self.on_speed_changed()
 
     def on_shuffle_changed(self) -> None:
         if self.engine is not None:

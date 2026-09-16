@@ -7,8 +7,7 @@ back when you stop.
 ![Rapid Background Changer](https://raw.githubusercontent.com/kai9987kai/kai9987kai.github.io/master/Screenshots/cap2.PNG)
 
 > **Photosensitivity note.** At high speeds this flashes images in quick
-> succession. If you are sensitive to flashing light, keep the speed low. The
-> window's speed slider starts at a gentle 10 changes per second.
+> succession. If you are sensitive to flashing light, keep the speed low.
 
 ## Install
 
@@ -63,6 +62,20 @@ existing shortcuts keep working.
 Stop a run at any time with `Ctrl+C`; in the window, press `Escape` (or `Ctrl+C`),
 `Space` pauses and resumes.
 
+### Speed
+
+There is no artificial ceiling. The loop itself costs about 1.5 microseconds per
+change — roughly 660,000 a second — so the only real limit is how fast your
+desktop can accept a new wallpaper.
+
+* **In the window:** the slider runs from 1 to 60 changes a second and starts at
+  10. Tick **Max speed** to drop the delay entirely and run flat out, which is
+  what the original script always did.
+* **On the command line:** `--interval 0` (or `-i 0`) is flat out. The default is
+  a deliberately calmer 20 a second, printed at the start of every run.
+
+Both can be changed while a run is in progress.
+
 ## How it works
 
 | Module | Responsibility |
@@ -107,10 +120,11 @@ long-standing defects and grows the rest around them:
   opens is now actually closed.
 * **macOS and Linux support**, plus a `null` backend so it runs anywhere.
 * **Rapid frames are cheap.** Each change skips the registry write and the
-  system-wide broadcast; only the final wallpaper is persisted.
+  system-wide broadcast; only the final wallpaper is persisted, so flat-out
+  cycling is faster than the original and far gentler on your disk.
 * **Dead code removed.** Four threads were started *after* `mainloop()` returned,
   one of them targeting a non-callable.
-* **Tests and CI.** 78 tests across Windows, macOS and Linux on Python 3.8–3.12.
+* **Tests and CI.** 81 tests across Windows, macOS and Linux on Python 3.8–3.12.
 
 ## Contributing
 

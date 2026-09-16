@@ -258,3 +258,45 @@ def test_hotkey_callback_only_sets_a_flag(fake_tk, image_dir, monkeypatch):
     registered["ctrl+c"]()  # fire it as the listener thread would
     assert app._stop_requested.is_set()
     app.on_close()
+
+
+def test_max_speed_removes_the_delay_entirely(fake_tk, image_dir):
+    """The window must be able to run flat out, as the original script did."""
+    app = make_app(fake_tk, image_dir)
+    assert app.interval > 0
+
+    app.maxspeed_var.set(True)
+    app.on_maxspeed_changed()
+    assert app.interval == 0.0
+    assert app.speed_var.get() == "as fast as possible"
+    assert app.speed_scale.cget("state") == "disabled"
+
+    app.on_start()
+    assert wait_until(lambda: app.engine.stats.frames >= 200, timeout=5.0)
+    assert app.engine.interval == 0.0
+    app.on_close()
+
+
+def test_max_speed_can_be_switched_off_again(fake_tk, image_dir):
+    app = make_app(fake_tk, image_dir)
+    app.maxspeed_var.set(True)
+    app.on_maxspeed_changed()
+    app.maxspeed_var.set(False)
+    app.on_maxspeed_changed()
+    assert app.interval == pytest.approx(1 / 60)
+    assert app.speed_scale.cget("state") == "normal"
+    assert "60 changes/sec" in app.speed_var.get()
+    app.on_close()
+
+
+def test_max_speed_reaches_a_running_engine(fake_tk, image_dir):
+    app = make_app(fake_tk, image_dir)
+    app.rate_var.set(2.0)
+    app.on_speed_changed()
+    app.on_start()
+    assert app.engine.interval == pytest.approx(0.5)
+
+    app.maxspeed_var.set(True)
+    app.on_maxspeed_changed()
+    assert app.engine.interval == 0.0
+    app.on_close()
